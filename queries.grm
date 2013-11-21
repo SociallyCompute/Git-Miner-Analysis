@@ -1,0 +1,134 @@
+import net.wagstrom.research.github.EdgeType
+import net.wagstrom.research.github.IndexNames
+import net.wagstrom.research.github.IdCols
+import net.wagstrom.research.github.PropertyName
+
+DBPATH="/home/kellyb/new_data/graph.db"
+
+//repos = ["rails/rails","cakephp/cakephp","joyent/node","twitter/bootstrap","jquery/jquery","saltstack/salt","pulse00/Symfony-2-Eclipse-Plugin","droolsjbpm/droolsjbpm-tools","joeferraro/MavensMate-SublimeText","typesafehub/sbteclipse","aptana/studio3-rcp","snaewe/redmin-mylyncon","evernote/evernote-sdk-java","evernote/evernote-sdk-ios","evernote/evernote-sdk-js","evernote/evernote-sdk-mac","evernote/evernote-sdk-php","evernote/evernote-sdk-python","evernote/opauth-evernote","evernote/evernote-oauth-ruby","evernote/simple-api-client-example-ruby","evernote/evernote-sdk-android","evernote/evernote-sdk-ruby","evernote/phonegap-example","evernote/ops-elesai","evernote/evernote-thrift","evernote/evernote-m2","evernote/evernote-sdk-as3","evernote/evernote-sdk-cpp","evernote/evernote-sdk-csharp","evernote/evernote-sdk-perl","evernote/ops-warthog","evernote/evernote-demo-metro","evernote/ops-dribbled","evernote/ops-senedsa","evernote/python-findrelated-example","evernote/simple-api-client-example-ios","evernote/evernote-sdk-python3","evernote/old-ios-sample","evernote/Specs","mxcl/homebrew","h5bp/html5-boilerplate","saasbook/hw3_rottenpotatoes","django/django","django/django-localflavor-pt","django/django-localflavor-uy","django/code.djangoproject.com","django/djangoproject.com","django/django-docs-translations"]
+//repos = ["ushahidi/crowdmap-issues","ushahidi/Lamu","ushahidi/SwiftRiver-API","ushahidi/Ushahidi_Android","ushahidi/Ushahidi-Localizations","ushahidi/Ushahidi_Web","ushahidi/SwiftRiver","ushahidi/Ushahidi_iPhone","ushahidi/Ushahidi_Java","ushahidi/ushahidi-plugins-mobile","ushahidi/crowdmapid-server","ushahidi/swiftriver-core-rules-processor","ushahidi/swiftriver-core-dropqueue-processer","ushahidi/SwiftRiver-Core","ushahidi/swiftriver-plugin-twitter","ushahidi/Ushahidi_Plugins","ushahidi/Ushahidi-plugin-cloudmade","ushahidi/swiftriver-api-java","ushahidi/SMSSync","ushahidi/crowdmapid-ui","ushahidi/swiftriver-plugin-feedwriter","ushahidi/uchaguzi","ushahidi/Ushahidi-plugin-actionable","ushahidi/ushahidi-soundcloud","ushahidi/swiftriver-plugin-rss","ushahidi/kohana-captcha","ushahidi/swiftriver-plugin-ushahidi","ushahidi/K3-Cache_Redis","ushahidi/swiftriver-plugin-swiftcore","ushahidi/swiftriver-plugin-mediaextractor","ushahidi/swiftriver-plugin-sms","ushahidi/swiftriver-plugin-bookmarklet","ushahidi/swiftriver-plugin-email","ushahidi/swiftriver-plugin-messaging","ushahidi/ushahidi-plugin-swiftriver","ushahidi/Ushahidi-plugin-facebook-social","ushahidi/Ushahidi-plugin-analysis","ushahidi/gnip4j","ushahidi/swiftriver-plugin-flickr","ushahidi/swiftriver-plugin-instagram","ushahidi/swiftriver-plugin-webanalytics","ushahidi/Ushahidi-plugin-youtubeembed","ushahidi/Ushahidi-theme--Baddeo","ushahidi/Badges","ushahidi/Ushahidi-plugin-sms-anonymizer","ushahidi/Ushahidi-plugin-simile","ushahidi/virtual-machines","ushahidi/Ushahidi-plugin-gpxer","ushahidi/Ushahidi-plugin-flickrwijit","ushahidi/Ushahidi-plugin-growl","ushahidi/Ushahidi-plugin-mobileci","ushahidi/Ushahidi-plugin-nexmo","ushahidi/Ushahidi-plugin-categorycloud","ushahidi/riverid-python","ushahidi/Ubuntu_MacBook_Pro_8.1","ushahidi/Ushahidi_Deploy","ushahidi/dpr","ushahidi/Subprocess_API","ushahidi/silcc","ushahidi/Reverberations","ushahidi/Sweeper","ushahidi/Sweeper_0.3.2","ushahidi/ULP","ushahidi/mobilefeed","ushahidi/swiftgate","ushahidi/Ushahidi_j2me","ushahidi/Swiftriver-2011","ushahidi/swiftmeme","ushahidi/Ushahidi_Huduma","ushahidi/swift-lib","ushahidi/geodict","ushahidi/Ushahidi_Election","ushahidi/Ushahidi_Firefox","ushahidi/Swift_Extensions","ushahidi/Sweeper-NEAT","ushahidi/SwiftRiver-NEAT","ushahidi/SiCDS","ushahidi/Ushahidi_FrontlineSMS","ushahidi/wp-silcc","ushahidi/Google-Translate","ushahidi/wp-veracity","ushahidi/ushahidi-haiti-icons","ushahidi/Ushahidi-plugin-KML","ushahidi/Abraxas","ushahidi/Ushahidi_Haiti","ushahidi/Ushahidi_Chile","ushahidi/Kohana-Standards-Coda-Plugin","ushahidi/SMS-Turks","ushahidi/Ushahidi_MHI","ushahidi/Ushahidi_WinMobile","ushahidi/Ushahidi_Kanco"]
+repos = ["saltstack/salt"]
+
+g = new Neo4jGraph(DBPATH)
+repoidx = g.idx(IndexNames.REPOSITORY)
+
+//write headers
+f_pr = new File('/home/kellyb/output/salt/pull_requests.txt')
+f_pr.write('repo~gitHubId~body~patchUrl~state~number~issueUrl~type~sys_discussions_added~issueCreatedAt~url~deletions~updatedAt~pullrequest_id~diffUrl~htmlUrl~title~additions~issueUpdatedAt~sys_update_complete~createdAt~sys_created_at~commits~comments \n')
+
+f_pro = new File('/home/kellyb/output/salt/pull_requests_owner.txt')
+f_pro.write('repo~pr.number~pr.pullrequest_id~owner.login\n')
+
+f_prod = new File('/home/kellyb/output/salt/pull_requests_owner_details.txt')
+f_prod.write('repo~gitHubId~sys_events_added~user_type~totalPrivateRepoCount~sys_last_updated~private_gist_count~type~gravatarId~sys_last_full_update~diskUsage~url~public_gist_count~following~followers~collaborators~createdAt~sys_created_at~ownedPrivateRepoCount~login~public_repo_count\n')
+
+f_prm = new File('/home/kellyb/output/salt/pull_requests_merger.txt')
+f_prm.write('repo~pr.number~pr.pullrequest_id~merger.login\n')
+
+f_prmd = new File('/home/kellyb/output/salt/pull_requests_merger_details.txt')
+f_prmd.write('repo~location~sys_last_updated~type~blog~gravatarId~followers~following~createdAt~name~login~fullname~gitHubId~sys~events_added~user_type~totalPrivateRepoCount~private_gist_count~sys_last_full_update~biography~diskUsage~url~public_gist_count~collaborators~email~sys_created_at~company~ownedPrivateRepoCount~public_repo_count\n')
+
+f_issue_comments = new File('/home/kellyb/output/salt/issue_comments.txt')
+f_issue_comments.write('repo~issue_number~issue_id~gitHubId~updatedAt~body~comment_id~createdAt~sys_created_at~type~url~owner_login\n')
+
+f_c = new File('/home/kellyb/output/salt/commits.txt')
+f_c.write('repo~message~isMerge~hash~sys_created_at~commitId~date~type~url\n')
+
+f_ci = new File('/home/kellyb/output/salt/issue_commits.txt')
+f_ci.write('repo~issue_number~issue_id~commitId~event\n')
+
+f_cc = new File('/home/kellyb/output/salt/commits_comments.txt')
+f_cc.write('repo~gitHubId~position~updatedAt~body~comment_id~sys_created_at~createdAt~commitId~path~line~type~url~commenter_login\n')
+
+f_cf = new File('/home/kellyb/output/salt/commits_files.txt')
+f_cf.write('repo~commit.hash~token~sys_created_at~type\n')
+
+f_ca = new File('/home/kellyb/output/salt/commits_author.txt')
+f_ca.write('repo~commit.hash~author\n')
+
+f_cad = new File('/home/kellyb/output/salt/commits_author_details.txt')
+f_cad.write('repo~timezone~sys_created_at~string~timezoneOffset~date~type\n')
+
+f_cp = new File('/home/kellyb/output/salt/commits_parent.txt')
+f_cp.write('repo~commit.hash~parent.hash\n')
+
+f_i = new File('/home/kellyb/output/salt/issues.txt')
+f_i.write('repo~gitHubId~body~sys_events_added~closedAt~sys_comments_added~issue_id~state~number~sys_last_updated~type~updatedAt~title~htmlUrl~createdAt~sys_created_at~user~comments~owner\n')
+
+f_ie = new File('/home/kellyb/output/salt/issue_events.txt')
+f_ie.write('repo~issue_number~issue_id~gitHubId~createdAt~event~sys_created_at~commitId~event_id~type~url~actor_login~actor_fullname\n')
+
+f_f = new File('/home/kellyb/output/salt/forks.txt')
+f_f.write('repo~isFork~openIssues~htmlUrl~hasIssues~isPrivate~createdAt~description~name~cloneUrl~gitUrl~fullname~watchers~gitHubId~svnUrl~homepage~url~size~updatedAt~forks~sys_created_at~hasDownloads~language~reponame~hasWiki\n')
+
+f_follow = new File('/home/kellyb/output/salt/pr_owners_following.txt')
+f_follow.write('repo~user~following~when\n')
+
+f_importantFollow = new File('/home/kellyb/output/salt/vip_following.txt')
+f_importantFollow.write('repo~user~following~when\n')
+
+//get data for each repo
+for (repoName in repos) {
+        repo = repoidx.get(IdCols.REPOSITORY, repoName).iterator().next()
+
+	//get pull request data
+	repo.out(EdgeType.PULLREQUEST).toSet().each{pr -> String body = null; if(pr.body!=null) body=pr.body.replaceAll("\n","").replaceAll("\r","").replaceAll("~",""); String title = null; if(pr.title!=null) title=pr.title.replaceAll("\n","").replaceAll("\r","").replaceAll("~",""); f_pr.append(repoName + '~' + pr.gitHubId + '~' + body + '~' + pr.patchUrl + '~' + pr.state + '~' + pr.number + '~' + pr.issueUrl + '~' + pr.type + '~' + pr.sys_discussions_added + '~' + pr.issueCreatedAt + '~' + pr.url + '~' + pr.deletions + '~' + pr.updatedAt + '~' + pr.pullrequest_id + '~' + pr.diffUrl + '~' + pr.htmlUrl + '~' + title + '~' + pr.additions + '~' + pr.issueUpdatedAt + '~' + pr.sys_update_complete + '~' + pr.createdAt + '~' + pr.sys_created_at + '~' + pr.commits + '~' + pr.comments + '\n')}
+
+	//get pull request owners
+	repo.out(EdgeType.PULLREQUEST).in('PULLREQUEST_OWNER').path.toSet().each{main,pr,owner -> f_pro.append(repoName + '~' + pr.number + '~' + pr.pullrequest_id + '~' + owner.login + '\n')}
+
+	//get owner details
+	repo.out(EdgeType.PULLREQUEST).in('PULLREQUEST_OWNER').toSet().each{owner -> f_prod.append(repoName + '~' + owner.gitHubId + '~' +  owner.sys_events_added + '~' + owner.user_type + '~' + owner.totalPrivateRepoCount + '~' + owner.sys_last_updated + '~' + owner.private_gist_count  + '~' + owner.type + '~' + owner.gravatarId + '~' + owner.sys_last_full_update  + '~' + owner.diskUsage + '~' + owner.url + '~' + owner.public_gist_count + '~' + owner.following + '~' + owner.followers + '~' + owner.collaborators + '~' + owner.createdAt  + '~' + owner.sys_created_at  + '~' + owner.ownedPrivateRepoCount  + '~' + owner.login  + '~' + owner.public_repo_count + '\n')}
+
+	//get pull request merger
+      	repo.out(EdgeType.PULLREQUEST).out('PULLREQUEST_MERGED_BY').path.toSet().each{main,pr,merger -> f_prm.append(repoName + '~' + pr.number + '~' + pr.pullrequest_id + '~' + merger.login + '\n')}
+
+	//get pull request merger details
+	repo.out(EdgeType.PULLREQUEST).out('PULLREQUEST_MERGED_BY').toSet().each{merger -> String biography = null; if(merger.biography != null) biography = merger.biography.replaceAll("\n","").replaceAll("\r","").replaceAll("~",""); f_prmd.append(repoName + '~' + merger.location + '~' + merger.sys_last_updated + '~' + merger.type + '~' + merger.blog + '~' + merger.gravatarId + '~' + merger.followers + '~' + merger.following + '~' + merger.createdAt + '~' + merger.name + '~' + merger.login + '~' + merger.fullname + '~' + merger.gitHubId + '~' + merger.sys_events_added + '~' + merger.user_type + '~' + merger.totalPrivateRepoCount + '~' + merger.private_gist_count + '~' + merger.sys_last_full_update + '~' + biography + '~' + merger.diskUsage + '~' + merger.url + '~' + merger.public_gist_count + '~' + merger.collaborators + '~' + merger.email + '~' + merger.sys_created_at + '~' + merger.company + '~' + merger.ownedPrivateRepoCount + '~' + merger.public_repo_count + '\n')}
+
+	//get pull request comments
+	repo.out('ISSUE').out('ISSUE_COMMENT').in('ISSUE_COMMENT_OWNER').path.toSet().each{main,issue,comment,owner -> String body = null; if(comment.body != null) body = comment.body.replaceAll("\n", "").replaceAll("\r","").replaceAll("~",""); f_issue_comments.append(repoName + '~' + issue.number + '~' + issue.issue_id + '~' + comment.gitHubId + '~' + comment.updatedAt + '~' + body + '~' + comment.comment_id + '~' + comment.createdAt + '~' + comment.sys_created_at + '~' + comment.type + '~' + comment.url + '~' + owner.login + '\n')}
+
+	//commits
+	repo.in(EdgeType.REPOSITORY).out('COMMIT_PARENT').toSet().each{commit -> String message = null; if(commit.message != null) message = commit.message.replaceAll("\n", "").replaceAll("\r","").replaceAll("~",""); f_c.append(repoName + '~' + message  + '~' + commit.isMerge + '~' + commit.hash + '~' + commit.sys_created_at + '~' + commit.commitId + '~' + commit.date + '~' + commit.type + '~' + commit.url + '\n')}
+
+	//commit to issue
+	repo.out('ISSUE').out('ISSUE_EVENT').out('EVENT_COMMIT').path.toSet().each{main,issue,event,commit -> f_ci.append(repoName + '~' + issue.number + '~' + issue.issue_id + '~' + commit.commitId + '~' + event.event + '\n')}
+
+	//commit comments
+	repo.out('REPO_CONTRIBUTOR').out('USER_EVENT').out('EVENT_COMMIT_COMMENT').path.toSet().each{main,person,event,comment -> String body = null; if(comment.body != null) body = comment.body.replaceAll("\n", "").replaceAll("\r","").replaceAll("~",""); f_cc.append(repoName + '~' + comment.gitHubId + '~' + comment.position + '~' + comment.updatedAt  + '~' + body + '~' + comment.comment_id + '~' + comment.sys_created_at + '~' + comment.createdAt + '~' + comment.commitId + '~' + comment.path + '~' + comment.line + '~' + comment.type  + '~' + comment.url + '~' + person.login + '\n')}
+
+	//commits files changed
+	repo.in(EdgeType.REPOSITORY).out('COMMIT_PARENT').out('CHANGED').path.toSet().each{main,repo,commit,file -> f_cf.append(repoName + '~' + commit.hash + '~' + file.token + '~' + file.sys_created_at + '~' + file.type + '\n')}
+
+	//commits author
+	repo.in(EdgeType.REPOSITORY).out('COMMIT_PARENT').out('AUTHOR').path.toSet().each{main,repo,commit,author -> f_ca.append(repoName + '~' + commit.hash + '~' + author.string + '\n')}
+
+	//get each author
+	repo.in(EdgeType.REPOSITORY).out('COMMIT_PARENT').out('AUTHOR').toSet().each{author -> f_cad.append(repoName + '~' + author.timezone + '~' + author.sys_created_at + '~' + author.string + '~' + author.timezoneOffset + '~' + author.date + '~' + author.type + '\n')}
+
+	//get commit parent
+	repo.in(EdgeType.REPOSITORY).out('COMMIT_PARENT').out('COMMIT_PARENT').path.toSet().each{main,repo,commit,parent -> f_cp.append(repoName + '~' + commit.hash + '~' + parent.hash + '\n')}
+
+	//issues
+	repo.out('ISSUE').in('ISSUE_OWNER').path.toSet().each{main,issue,owner -> String body = null; if(issue.body != null) body = issue.body.replaceAll("\n", "").replaceAll("~","").replaceAll("\r",""); String title = null; if(issue.title != null) title = issue.title.replaceAll("\n","").replaceAll("~","").replaceAll("\r",""); f_i.append(repoName + '~' + issue.gitHubId + '~' + body + '~' + issue.sys_events_added + '~' + issue.closedAt + '~' + issue.sys_comments_added + '~' + issue.issue_id + '~' + issue.state + '~' + issue.number + '~' + issue.sys_last_updated + '~' + issue.type + '~' + issue.updatedAt + '~' + title + '~' + issue.htmlUrl + '~' + issue.createdAt + '~' + issue.sys_created_at + '~' + issue.user + '~' + issue.comments + '~' + owner.login + '\n')}
+
+	//issue events
+	repo.out('ISSUE').out('ISSUE_EVENT').in('ISSUE_EVENT_ACTOR').path.toSet().each{main,issue,event,actor -> f_ie.append(repoName + '~' + issue.number + '~' + issue.issue_id + "~" + event.gitHubId + '~' + event.createdAt + '~' + event.event + '~' + event.sys_created_at + '~' + event.commitId + '~' + event.event_id + '~' + event.type + '~' + event.url + '~' + actor.login + '~' + actor.fullname + '\n')}
+
+	//forks
+	repo.out('REPO_FORK').path.toSet().each{main,fork -> f_f.append(repoName + '~' + fork.isFork + '~' + fork.openIssues + '~' + fork.htmlUrl + '~' + fork.hasIssues + '~' + fork.isPrivate + '~' + fork.createdAt + '~' + fork.description + '~' + fork.name + '~' + fork.cloneUrl + '~' + fork.gitUrl + '~' + fork.fullname + '~' + fork.watchers + '~' + fork.gitHubId + '~' + fork.svnUrl + '~' + fork.homepage + '~' + fork.url + '~' + fork.size + '~' + fork.updatedAt + '~' + fork.forks + '~' + fork.sys_created_at + '~' + fork.hasDownloads + '~' + fork.language + '~' + fork.reponame + '~' + fork.hasWiki + '\n')}
+
+	//who are the pull request owners following
+	repo.out(EdgeType.PULLREQUEST).in(EdgeType.PULLREQUESTOWNER).out('USER_EVENT').out('EVENT_FOLLOW_USER').path.toSet().each{main,pr,user,event,following -> f_follow.append(repoName + '~' + user.login + '~' + following.login + '~' + event.createdAt + '~' + event.eventType + '\n')}
+	
+	//who are the contributors, collaborators, repo owners following
+	repo.out(EdgeType.REPOCONTRIBUTOR).out('USER_EVENT').out('EVENT_FOLLOW_USER').path.toSet().each{main,user,event,following -> f_importantFollow.append(repoName + '~' + user.login + '~' + following.login + '~' + event.createdAt + '~' + event.eventType + '\n')}
+	repo.in(EdgeType.REPOOWNER).out('USER_EVENT').out('EVENT_FOLLOW_USER').path.toSet().each{main,user,event,following -> f_importantFollow.append(repoName + '~' + user.login + '~' + following.login + '~' + event.createdAt + '~' + event.eventType + '\n')}
+	repo.out(EdgeType.REPOCOLLABORATOR).out('USER_EVENT').out('EVENT_FOLLOW_USER').path.toSet().each{main,user,event,following -> f_importantFollow.append(repoName + '~' + user.login + '~' + following.login + '~' + event.createdAt + '~' + event.eventType + '\n')}
+
+//repo.out('REPO_CONTRIBUTOR').out('USER_EVENT').out('EVENT_MEMBER') for member events
+//{createdAt=1338473274, sys_created_at=1353332855, event_id=1557688890, eventType=MemberEvent, type=EVENT, eventAction=added}
+
+}
+g.shutdown()
